@@ -1,48 +1,81 @@
-# opensource_mds
+## Open Source MDS
 
-This is a [Dagster](https://dagster.io/) project scaffolded with [`dagster project scaffold`](https://docs.dagster.io/getting-started/create-new-project).
+![](dbt_project/reports/static/asset_graph.png)
 
-## Getting started
+This stack is built on a combination of tools including
 
-First, install your Dagster code location as a Python package. By using the --editable flag, pip will install your Python package in ["editable mode"](https://pip.pypa.io/en/latest/topics/local-project-installs/#editable-installs) so that as you develop, local code changes will automatically apply.
+- [Dagster](https://dagster.io)
+- [DuckDB](https://duckdb.org)
+- [dbt](https://www.getdbt.com)
+- [dbt-duckdbt](https://github.com/jwills/dbt-duckdb)
+- [Sling](https://sling.io)
+- [Steampipe](https://steampipe.io)
 
-```bash
-pip install -e ".[dev]"
+
+## Requirements
+
+You will need Python installed. This was all tested on Python 3.10.12
+From a virtual environment, run
+
+```python
+pip install -e .'[dev]'
+```
+Most of the depdendencies will be installed through Python.
+
+For Evidence.dev, you will need [nodejs](https://nodejs.org/en/download) installed
+
+Install [Sling](https://docs.slingdata.io/sling-cli/getting-started) for getting data from Postgres.
+
+```
+# On Mac, view the website for other platforms
+brew install slingdata-io/sling/sling
 ```
 
-Then, start the Dagster UI web server:
 
-```bash
+Steampipe is a separate requirement for the Mastodon API, and can be installed by following the [instructions here](https://steampipe.io/downloads)
+
+On Apple, run:
+
+```shell
+brew install turbot/tap/steampipe
+steampipe install turbot/mastodon
+```
+
+For the Mastodon API, create an Access Token. I used the [birds.town](https://birds.town/settings/applications)
+instance.
+
+Update `~/.steampipe/config/mastodon.spc` with your token and instance:
+
+```
+connection "mastodon" {
+    plugin = "mastodon"
+    server = "https://birds.town"
+    access_token = "abcd12345supersecretpassword"
+    max_toots = -1
+}
+```
+
+And run
+
+```shell
 dagster dev
 ```
 
-Open http://localhost:3000 with your browser to see the project.
+Load up dagster at http://localhost:3000/asset-groups/
 
-You can start writing assets in `opensource_mds/assets.py`. The assets are automatically loaded into the Dagster code location as you define them.
-
-## Development
+And click Materialize all to run the end-to-end pipeline.
 
 
-### Adding new Python dependencies
+## Visualization
 
-You can specify new Python dependencies in `setup.py`.
+Evidence.dev is used for visualization.
 
-### Unit testing
+First, go the `dbt_project` folder
 
-Tests are in the `opensource_mds_tests` directory and you can run tests using `pytest`:
+```
+cd dbt_project
 
-```bash
-pytest opensource_mds_tests
+npm --prefix ./reports install
+npm --prefix ./reports run dev -- --port 4000
 ```
 
-### Schedules and sensors
-
-If you want to enable Dagster [Schedules](https://docs.dagster.io/concepts/partitions-schedules-sensors/schedules) or [Sensors](https://docs.dagster.io/concepts/partitions-schedules-sensors/sensors) for your jobs, the [Dagster Daemon](https://docs.dagster.io/deployment/dagster-daemon) process must be running. This is done automatically when you run `dagster dev`.
-
-Once your Dagster Daemon is running, you can start turning on schedules and sensors for your jobs.
-
-## Deploy on Dagster Cloud
-
-The easiest way to deploy your Dagster project is to use Dagster Cloud.
-
-Check out the [Dagster Cloud Documentation](https://docs.dagster.cloud) to learn more.

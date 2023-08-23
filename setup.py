@@ -9,6 +9,8 @@ setup(
         "dagster-dbt",
         "dagster-duckdb",
         "duckdb[polars]",
+        "polars",
+        "pyarrow",
         "dbt-duckdb",
         "sling"
     ],

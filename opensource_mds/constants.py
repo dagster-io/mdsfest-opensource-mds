@@ -12,7 +12,9 @@ STEAMPIPE_QUERY="""
 with data as (
         select
         regexp_matches(content, '(#[^#\\s]+)', 'g') as hashtag
-        from mastodon_toot_local limit 100)
+        from mastodon_toot_local limit 1000
+)
+
 select
     hashtag,
     count(1) as count

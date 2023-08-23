@@ -24,17 +24,22 @@ class SlingResource(ConfigurableResource):
         mode="full-refresh",
         primary_key=None,
     ):
-        source = sling.Source(
-            conn=self.postgres_connect_str, stream=source_table, primary_key=primary_key
-        )
-        target = sling.Target(object=f"file://{os.path.abspath(destination_file)}")
+        config = {
+            "source": {
+                "conn": self.postgres_connect_str,
+                "stream": source_table,
+                "primary_key": primary_key,
+            },
+            "target": {
+                "object": f"file://{os.path.abspath(destination_file)}",
+            },
+            "mode": mode,
+        }
 
-        sling_cli = sling.Sling(source=source, target=target, mode=mode)
+        sling_cli = sling.Sling(**config)
 
         logger.info("Starting Sling sync with mode: %s", mode)
-
         messages = sling_cli.run(return_output=True, env={})
-        logger.info(messages)
 
         pattern = r"(\d+) rows"
         num_rows = 0
@@ -63,7 +68,7 @@ dbt_manifest_path = dbt_parse_invocation.target_path.joinpath("manifest.json")
 class CustomDagsterDbtTranslator(DagsterDbtTranslator):
     @classmethod
     def get_asset_key(cls, dbt_resource_props) -> AssetKey:
-        return AssetKey(dbt_resource_props['name'])
+        return AssetKey(dbt_resource_props["name"])
 
     def get_group_name(cls, dbt_resource_props) -> str:
         return "prepared"

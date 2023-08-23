@@ -1,7 +1,8 @@
 select
 
     year(date_trunc('year', obs_date)) as year,
-    american_english_name,
+    bird_name,
+    country,
     region,
     sum(species_count) as species_count
 

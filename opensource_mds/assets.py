@@ -208,13 +208,6 @@ def bird_toots_csv(context: AssetExecutionContext, duckdb: DuckDBResource):
 
     context.log.info("Created bird_toots file")
 
-    with duckdb.get_connection() as conn:
-        conn.execute(
-            f"""CREATE OR REPLACE TABLE bird_toots as (
-                        SELECT * FROM read_csv_auto('{toot_path}'))
-                """
-        )
-
 
 @asset(deps=[bird_toots_csv], compute_kind="duckdb", group_name="prepared")
 def bird_toots(context: AssetExecutionContext, duckdb: DuckDBResource):
@@ -245,18 +238,28 @@ def bird_toots(context: AssetExecutionContext, duckdb: DuckDBResource):
     context.log.info("Created bird_toots table")
 
 
-@asset(group_name="raw_data")
+@asset(group_name="raw_data", compute_kind="sling")
 def tickets_raw(context: AssetExecutionContext, sling: SlingResource):
-    fpath = file_relative_path(__file__, "../data/raw/tickets.parquet")
+    fpath = file_relative_path(__file__, "../data/raw/tickets.csv")
     fsize, nrows = sling.sync("tickets", fpath)
     context.add_output_metadata(
         metadata={"num_rows": nrows, "file_size": fsize, "path": fpath}
     )
 
 
+@asset(group_name="raw_data", compute_kind="sling")
+def events_raw(context: AssetExecutionContext, sling: SlingResource):
+    fpath = file_relative_path(__file__, "../data/raw/events.csv")
+    fsize, nrows = sling.sync("events", fpath)
+    context.add_output_metadata(
+        metadata={"num_rows": nrows, "file_size": fsize, "path": fpath}
+    )
+
+
+
 @asset(deps=[tickets_raw], compute_kind="duckdb", group_name="prepared")
 def tickets(context: AssetExecutionContext, duckdb: DuckDBResource):
-    fpath = file_relative_path(__file__, "../data/raw/tickets.parquet")
+    fpath = file_relative_path(__file__, "../data/raw/tickets.csv")
     with duckdb.get_connection() as conn:
         conn.execute(
             f"""CREATE OR REPLACE TABLE tickets AS (
@@ -282,6 +285,33 @@ def tickets(context: AssetExecutionContext, duckdb: DuckDBResource):
 
     context.log.info("Created tickets table")
 
+@asset(deps=[events_raw], compute_kind="duckdb", group_name="prepared")
+def events(context: AssetExecutionContext, duckdb: DuckDBResource):
+    fpath = file_relative_path(__file__, "../data/raw/events.csv")
+    with duckdb.get_connection() as conn:
+        conn.execute(
+            f"""CREATE OR REPLACE TABLE events AS (
+                    SELECT * FROM read_csv_auto('{fpath}'))
+            """
+        )
+        nrows = conn.execute("SELECT COUNT(*) FROM events ").fetchone()[0]  # type: ignore
+
+        metadata = conn.execute(
+            "select * from duckdb_tables() where table_name = 'events'"
+        ).pl()
+
+    context.add_output_metadata(
+        metadata={
+            "num_rows": nrows,
+            "table_name": metadata["table_name"][0],
+            "datbase_name": metadata["database_name"][0],
+            "schema_name": metadata["schema_name"][0],
+            "column_count": metadata["column_count"][0],
+            "estimated_size": metadata["estimated_size"][0],
+        }
+    )
+
+    context.log.info("Created events table")
 
 @dbt_assets(manifest=dbt_manifest_path, dagster_dbt_translator=CustomDagsterDbtTranslator())
 def dbt_birds(context: OpExecutionContext, dbt: DbtCliResource):
