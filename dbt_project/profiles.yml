@@ -1,0 +1,6 @@
+dbirdt:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../data/db/osmds.db

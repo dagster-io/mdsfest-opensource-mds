@@ -1,0 +1,9 @@
+sources:
+  - name: main
+    tables:
+      - name: bird_toots
+      - name: tickets
+      - name: birds
+      - name: sites
+      - name: species
+
