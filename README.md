@@ -38,7 +38,7 @@ On Apple, run:
 
 ```shell
 brew install turbot/tap/steampipe
-steampipe install turbot/mastodon
+steampipe plugin install turbot/mastodon
 ```
 
 For the Mastodon API, create an Access Token. I used the [birds.town](https://birds.town/settings/applications)
