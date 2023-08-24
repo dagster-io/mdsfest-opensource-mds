@@ -8,6 +8,7 @@ This stack is built on a combination of tools including
 - [DuckDB](https://duckdb.org)
 - [dbt](https://www.getdbt.com)
 - [dbt-duckdbt](https://github.com/jwills/dbt-duckdb)
+- [Evidence](https://evidence.dev)
 - [Sling](https://sling.io)
 - [Steampipe](https://steampipe.io)
 
