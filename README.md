@@ -8,6 +8,7 @@ This stack is built on a combination of tools including
 - [DuckDB](https://duckdb.org)
 - [dbt](https://www.getdbt.com)
 - [dbt-duckdbt](https://github.com/jwills/dbt-duckdb)
+- [Evidence](https://evidence.dev)
 - [Sling](https://sling.io)
 - [Steampipe](https://steampipe.io)
 
@@ -38,7 +39,7 @@ On Apple, run:
 
 ```shell
 brew install turbot/tap/steampipe
-steampipe install turbot/mastodon
+steampipe plugin install turbot/mastodon
 ```
 
 For the Mastodon API, create an Access Token. I used the [birds.town](https://birds.town/settings/applications)
