@@ -2,15 +2,20 @@
 
 ![](dbt_project/reports/static/asset_graph.png)
 
-This stack is built on a combination of tools including
+## The Talk
+
+You can watch a recording of [the talk on Youtube](https://www.youtube.com/watch?v=JHCDgRbWWq0)
+
+This stack is built on a combination of tools including:
 
 - [Dagster](https://dagster.io)
 - [DuckDB](https://duckdb.org)
 - [dbt](https://www.getdbt.com)
 - [dbt-duckdbt](https://github.com/jwills/dbt-duckdb)
 - [Evidence](https://evidence.dev)
-- [Sling](https://sling.io)
+- [Sling](https://slingdata.io)
 - [Steampipe](https://steampipe.io)
+
 
 
 ## Requirements
@@ -21,7 +26,7 @@ From a virtual environment, run
 ```python
 pip install -e .'[dev]'
 ```
-Most of the depdendencies will be installed through Python.
+Most of the dependencies will be installed through Python.
 
 For Evidence.dev, you will need [nodejs](https://nodejs.org/en/download) installed
 
