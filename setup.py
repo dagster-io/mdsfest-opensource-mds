@@ -4,15 +4,16 @@ setup(
     name="opensource_mds",
     packages=find_packages(exclude=["opensource_mds_tests"]),
     install_requires=[
+        "duckdb==0.9.1",
         "dagster",
-        "dagster-cloud",
+        "dagster-webserver",
         "dagster-dbt",
         "dagster-duckdb",
+        "dagster-embedded-elt",
         "duckdb[polars]",
         "polars",
         "pyarrow",
         "dbt-duckdb",
-        "sling"
     ],
     extras_require={"dev": ["dagster-webserver", "pytest"]},
 )

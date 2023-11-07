@@ -1,62 +1,27 @@
-import os
-import re
-import sys
-
 from dagster import file_relative_path, get_dagster_logger
-from dagster import AssetKey, ConfigurableResource
+from dagster import AssetKey, EnvVar
 from dagster_dbt import DagsterDbtTranslator, DbtCliResource
 from dagster_duckdb import DuckDBResource
-import sling
+from dagster_embedded_elt.sling import SlingResource, SlingSourceConnection, SlingTargetConnection
+
+duckdb_database=file_relative_path(__file__, "../data/db/osmds.db")
 
 duckdb_resource = DuckDBResource(
-    database=file_relative_path(__file__, "../data/db/osmds.db")
+    database=duckdb_database,
 )
+
 logger = get_dagster_logger()
 
+PG_CONN_STR = "postgresql://demo:demo@sample-data.popsql.io:5432/marker"
 
-class SlingResource(ConfigurableResource):
-    postgres_connect_str: str
-
-    def sync(
-        self,
-        source_table: str,
-        destination_file: str,
-        mode="full-refresh",
-        primary_key=None,
-    ):
-        config = {
-            "source": {
-                "conn": self.postgres_connect_str,
-                "stream": source_table,
-                "primary_key": primary_key,
-            },
-            "target": {
-                "object": f"file://{os.path.abspath(destination_file)}",
-            },
-            "mode": mode,
-        }
-
-        sling_cli = sling.Sling(**config)
-
-        logger.info("Starting Sling sync with mode: %s", mode)
-        messages = sling_cli.run(return_output=True, env={})
-
-        pattern = r"(\d+) rows"
-        num_rows = 0
-        for line in messages.splitlines():
-            sys.stdout.write(line + "\n")
-            match = re.search(pattern, line)
-            if match:
-                num_rows = int(match.group(1))
-
-        file_size = 0
-        if os.path.isfile(destination_file):
-            file_size = os.path.getsize(destination_file)
-        else:
-            logger.warning("Could not find file after writing")
-
-        return file_size, num_rows
-
+sling_resource = SlingResource(
+    source_connection=SlingSourceConnection(
+        type="postgres", connection_string=PG_CONN_STR,
+    ),
+    target_connection=SlingTargetConnection(
+        type="duckdb", instance=duckdb_database, duckdb_version="0.9.1",
+    ),
+)
 
 dbt_resource = DbtCliResource(
     project_dir=file_relative_path(__file__, "../dbt_project")
