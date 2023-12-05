@@ -4,7 +4,7 @@ from dagster_dbt import DagsterDbtTranslator, DbtCliResource
 from dagster_duckdb import DuckDBResource
 from dagster_embedded_elt.sling import SlingResource, SlingSourceConnection, SlingTargetConnection
 
-duckdb_database=file_relative_path(__file__, "../data/db/osmds.db")
+duckdb_database=file_relative_path(__file__, '/Users/resford/Documents/GitHub/open-source-stack/dbt_project/reports/osmds.db')
 
 duckdb_resource = DuckDBResource(
     database=duckdb_database,

@@ -3,4 +3,5 @@ dbirdt:
   outputs:
     dev:
       type: duckdb
-      path: ../data/db/osmds.db
+      path: /Users/resford/Documents/GitHub/open-source-stack/dbt_project/reports/osmds.db
+
