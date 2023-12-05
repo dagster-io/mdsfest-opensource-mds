@@ -3,8 +3,15 @@ from dagster import AssetKey, EnvVar
 from dagster_dbt import DagsterDbtTranslator, DbtCliResource
 from dagster_duckdb import DuckDBResource
 from dagster_embedded_elt.sling import SlingResource, SlingSourceConnection, SlingTargetConnection
+import os
+duckdb_database=file_relative_path(__file__, '../dbt_project/reports/osmds.db')
 
-duckdb_database=file_relative_path(__file__, '/Users/resford/Documents/GitHub/open-source-stack/dbt_project/reports/osmds.db')
+# Convert to an absolute path for debugging
+absolute_path = os.path.abspath(duckdb_database)
+
+print("Relative path:", duckdb_database)
+print("Absolute path:", absolute_path)
+
 
 duckdb_resource = DuckDBResource(
     database=duckdb_database,
