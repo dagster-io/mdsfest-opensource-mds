@@ -6,4 +6,4 @@ sources:
       - name: birds
       - name: sites
       - name: species
-
+      - name: usgs_data

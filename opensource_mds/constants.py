@@ -22,3 +22,13 @@ from data
 group by 1
 order by count desc, hashtag;
 """
+
+USGS_BASE_URL = "https://waterservices.usgs.gov/nwis/iv/"
+USGS_SITES = ["09379500", "09380000", "09381000"]  # Add your site numbers here
+PARAMETER_CODE = "00060,00010"  # Example: 00060 for discharge, 00010 for water temperature
+
+SITE_INFO = {
+    '09379500': {'river_name': 'San Juan', 'site_name': 'Near Bluff, UT'},
+    '09380000': {'river_name': 'Colorado', 'site_name': 'At Lees Ferry, AZ'},
+    # Add other site mappings here...
+}

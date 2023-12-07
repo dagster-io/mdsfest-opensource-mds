@@ -1,9 +1,10 @@
 import time
+from datetime import datetime, timedelta
 import zipfile
 from tempfile import NamedTemporaryFile
 from dagster_duckdb import DuckDBResource
 from dagster_embedded_elt.sling import SlingMode, build_sling_asset
-
+import pandas as pd
 import requests
 import subprocess
 from dagster import (
@@ -154,6 +155,74 @@ def birds(context: AssetExecutionContext, duckdb: DuckDBResource):
         }
     )
 
+@asset
+def fetch_usgs_data(context):
+    api_url = "https://waterservices.usgs.gov/nwis/iv/"
+    all_data = []
+
+    for site in constants.USGS_SITES:
+        params = {
+            "format": "json",
+            "sites": site,
+            "parameterCd": constants.PARAMETER_CODE,  # Discharge, water temperature
+        }
+
+        response = requests.get(api_url, params=params)
+        if response.status_code != 200:
+            context.log.error(f"Failed to fetch data from USGS for site {site}")
+            continue
+
+        data = response.json()
+        for series in data['value']['timeSeries']:
+            # Extract the nested data
+            for value_set in series['values']:
+                df = pd.json_normalize(value_set['value'])
+                df['site_number'] = site  # Add site number as a column
+                df['site_name'] = series['sourceInfo']['siteName']  # Add site name
+                all_data.append(df)
+
+    # Concatenate all dataframes into a single dataframe
+    combined_df = pd.concat(all_data, ignore_index=True)
+    return combined_df
+
+
+@asset
+def process_usgs_data(context, fetch_usgs_data):
+    context.log.info(f"Site info: {constants.SITE_INFO}") 
+    df = fetch_usgs_data
+
+    # Convert 'dateTime' to datetime and extract date
+    df['dateTime'] = pd.to_datetime(df['dateTime'])
+    df['date'] = df['dateTime'].dt.date
+
+    # Ensure 'value' is numeric
+    df['value'] = pd.to_numeric(df['value'], errors='coerce')
+
+    # Group by date and site, then calculate mean
+    daily_avg = df.groupby(['date', 'site_number']).mean().reset_index()
+
+    # Add river and site names based on site_number
+    daily_avg['river_name'] = daily_avg['site_number'].map(lambda x: constants.SITE_INFO.get(x, {}).get('river_name', 'Unknown'))
+    daily_avg['site_name'] = daily_avg['site_number'].map(lambda x: constants.SITE_INFO.get(x, {}).get('site_name', 'Unknown'))
+
+    return daily_avg
+
+@asset(required_resource_keys={"duckdb"})
+def load_data_to_duckdb(context, process_usgs_data):
+    duckdb: DuckDBResource = context.resources.duckdb
+    df = process_usgs_data  # Processed DataFrame from the previous asset
+
+    # Define a path for the CSV file
+    csv_file_path = '/Users/resford/Documents/GitHub/open-source-stack/data/raw/usgs_data.csv'  # Update this path as needed
+    df.to_csv(csv_file_path, index=False)
+
+    with duckdb.get_connection() as conn:
+        # Load data from CSV into DuckDB
+        conn.execute(
+            f"""CREATE OR REPLACE TABLE usgs_data AS (
+                    SELECT * FROM read_csv_auto('{csv_file_path}', sample_size=-1))
+            """
+        )
 
 @asset(
     deps=[species_translation_data],
