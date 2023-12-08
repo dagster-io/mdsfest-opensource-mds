@@ -157,97 +157,78 @@ def birds(context: AssetExecutionContext, duckdb: DuckDBResource):
 
 @asset
 def fetch_usgs_data(context):
-    api_url = "https://waterservices.usgs.gov/nwis/iv/"
     all_data = []
+
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=365)
+    start_date_str = start_date.strftime('%Y-%m-%d')
+    end_date_str = end_date.strftime('%Y-%m-%d')
 
     for site in constants.USGS_SITES:
         params = {
             "format": "json",
             "sites": site,
-            "parameterCd": constants.PARAMETER_CODE,  # Discharge, water temperature
+            "startDT": start_date_str,
+            "endDT": end_date_str,
+            "parameterCd": constants.PARAMETER_CODE,
         }
 
-        response = requests.get(api_url, params=params)
+        response = requests.get(constants.USGS_BASE_URL, params=params)
         if response.status_code != 200:
             context.log.error(f"Failed to fetch data from USGS for site {site}")
             continue
 
         data = response.json()
         for series in data['value']['timeSeries']:
-            # Extract the nested data
-            for value_set in series['values']:
-                df = pd.json_normalize(value_set['value'])
-                df['site_number'] = site  # Add site number as a column
-                df['site_name'] = series['sourceInfo']['siteName']  # Add site name
-                all_data.append(df)
+            if series['variable']['variableCode'][0]['value'] == '00060':  # Streamflow
+                site_code = series['sourceInfo']['siteCode'][0]['value']
+                site_name = series['sourceInfo']['siteName']
 
-    # Concatenate all dataframes into a single dataframe
-    combined_df = pd.concat(all_data, ignore_index=True)
+                for value in series['values'][0]['value']:
+                    # Parse the dateTime and check if it's on every fourth hour
+                    datetime_obj = datetime.fromisoformat(value['dateTime'])
+                    if datetime_obj.hour % 4 == 0 and datetime_obj.minute == 0 and datetime_obj.second == 0:
+                        all_data.append({
+                            "siteCode": site_code,
+                            "siteName": site_name,
+                            "dateTime": value['dateTime'],
+                            "cfs": value['value']
+                        })
+
+    # Create DataFrame from the collected data
+    combined_df = pd.DataFrame(all_data)
+
+    # Log the first few rows and DataFrame structure for debugging
+    context.log.info(f"Sample data from combined DataFrame:\n{combined_df.head()}")
+    context.log.info(f"DataFrame structure:\n{combined_df.dtypes}")
+
     return combined_df
 
-
-@asset
-def process_usgs_data(context, fetch_usgs_data):
-    context.log.info(f"Site info: {constants.SITE_INFO}") 
-    df = fetch_usgs_data
-
-    # Convert 'dateTime' to datetime and extract date
-    df['dateTime'] = pd.to_datetime(df['dateTime'])
-    df['date'] = df['dateTime'].dt.date
-
-    # Ensure 'value' is numeric
-    df['value'] = pd.to_numeric(df['value'], errors='coerce')
-
-    # Group by date and site, then calculate mean
-    daily_avg = df.groupby(['date', 'site_number']).mean().reset_index()
-
-    # Add river and site names based on site_number
-    daily_avg['river_name'] = daily_avg['site_number'].map(lambda x: constants.SITE_INFO.get(x, {}).get('river_name', 'Unknown'))
-    daily_avg['site_name'] = daily_avg['site_number'].map(lambda x: constants.SITE_INFO.get(x, {}).get('site_name', 'Unknown'))
-
-    return daily_avg
-
 @asset(required_resource_keys={"duckdb"})
-def load_data_to_duckdb(context: AssetExecutionContext, process_usgs_data):
+def load_data_to_duckdb(context: AssetExecutionContext, fetch_usgs_data):
     duckdb: DuckDBResource = context.resources.duckdb
-    df = process_usgs_data  # Processed DataFrame from the previous asset
-
-    # Define a path for the CSV file
-    csv_file_path = '/Users/resford/Documents/GitHub/open-source-stack/data/raw/usgs_data.csv'  # Update this path as needed
-    df.to_csv(csv_file_path, index=False)
+    df = fetch_usgs_data
 
     with duckdb.get_connection() as conn:
         try:
-            # Load data from CSV into DuckDB
+            # Load data into base_river_flow table
             conn.execute(
-                f"""CREATE OR REPLACE TABLE usgs_data AS (
-                        SELECT * FROM read_csv_auto('{csv_file_path}', sample_size=-1))
+                """CREATE OR REPLACE TABLE base_river_flow AS (
+                    SELECT "siteCode", "dateTime", "cfs"
+                    FROM df)
                 """
             )
-            nrows = conn.execute("SELECT COUNT(*) FROM usgs_data").fetchone()[0]
 
-            # Fetching metadata and using tuple indices
-            metadata_row = conn.execute(
-                "SELECT * FROM duckdb_tables() WHERE table_name = 'usgs_data'"
-            ).fetchone()
+            # Load distinct site data into dim_river_sites table
+            conn.execute(
+                """CREATE OR REPLACE TABLE dim_river_sites AS (
+                    SELECT DISTINCT "siteCode", "siteName"
+                    FROM df)
+                """
+            )
 
-            if metadata_row:
-                context.add_output_metadata(
-                    metadata={
-                        "num_rows": nrows,
-                        "table_name": metadata_row[1],  # Adjust indices based on query structure
-                        "database_name": metadata_row[0],
-                        "schema_name": metadata_row[2],
-                        "column_count": metadata_row[3],
-                        "estimated_size": metadata_row[4],
-                    }
-                )
-
-            context.log.info("Loaded data into usgs_data table")
-
-            # Adding a CHECKPOINT
             conn.execute("CHECKPOINT")
-            context.log.info("Checkpoint executed")
+            context.log.info("Data loaded and checkpoint executed")
 
         except Exception as e:
             context.log.error(f"Error loading data into DuckDB: {e}")
