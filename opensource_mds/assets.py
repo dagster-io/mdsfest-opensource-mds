@@ -208,7 +208,7 @@ def process_usgs_data(context, fetch_usgs_data):
     return daily_avg
 
 @asset(required_resource_keys={"duckdb"})
-def load_data_to_duckdb(context, process_usgs_data):
+def load_data_to_duckdb(context: AssetExecutionContext, process_usgs_data):
     duckdb: DuckDBResource = context.resources.duckdb
     df = process_usgs_data  # Processed DataFrame from the previous asset
 
@@ -217,12 +217,42 @@ def load_data_to_duckdb(context, process_usgs_data):
     df.to_csv(csv_file_path, index=False)
 
     with duckdb.get_connection() as conn:
-        # Load data from CSV into DuckDB
-        conn.execute(
-            f"""CREATE OR REPLACE TABLE usgs_data AS (
-                    SELECT * FROM read_csv_auto('{csv_file_path}', sample_size=-1))
-            """
-        )
+        try:
+            # Load data from CSV into DuckDB
+            conn.execute(
+                f"""CREATE OR REPLACE TABLE usgs_data AS (
+                        SELECT * FROM read_csv_auto('{csv_file_path}', sample_size=-1))
+                """
+            )
+            nrows = conn.execute("SELECT COUNT(*) FROM usgs_data").fetchone()[0]
+
+            # Fetching metadata and using tuple indices
+            metadata_row = conn.execute(
+                "SELECT * FROM duckdb_tables() WHERE table_name = 'usgs_data'"
+            ).fetchone()
+
+            if metadata_row:
+                context.add_output_metadata(
+                    metadata={
+                        "num_rows": nrows,
+                        "table_name": metadata_row[1],  # Adjust indices based on query structure
+                        "database_name": metadata_row[0],
+                        "schema_name": metadata_row[2],
+                        "column_count": metadata_row[3],
+                        "estimated_size": metadata_row[4],
+                    }
+                )
+
+            context.log.info("Loaded data into usgs_data table")
+
+            # Adding a CHECKPOINT
+            conn.execute("CHECKPOINT")
+            context.log.info("Checkpoint executed")
+
+        except Exception as e:
+            context.log.error(f"Error loading data into DuckDB: {e}")
+            raise
+
 
 @asset(
     deps=[species_translation_data],
