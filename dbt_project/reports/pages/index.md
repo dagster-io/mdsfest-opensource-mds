@@ -11,7 +11,7 @@ See the [About](/about) page for more information about the project.
 ```sql all_birds
 select *
 from all_birds
-limit 500
+limit 600
 ```
 
 <DataTable data="{all_birds}" search="true" />

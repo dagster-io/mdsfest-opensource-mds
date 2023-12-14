@@ -10,7 +10,7 @@ setup(
         "dagster-dbt",
         "dagster-duckdb",
         "dagster-embedded-elt",
-        "duckdb[polars]",
+        "duckdb",
         "polars",
         "pyarrow",
         "dbt-duckdb",

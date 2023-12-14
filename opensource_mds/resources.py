@@ -16,8 +16,6 @@ duckdb_resource = DuckDBResource(
 
 logger = get_dagster_logger()
 
-PG_CONN_STR = "postgresql://demo:demo@sample-data.popsql.io:5432/marker"
-
 sling_resource = SlingResource(
     source_connection=SlingSourceConnection(
         type="postgres",
