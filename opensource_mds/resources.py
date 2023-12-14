@@ -2,9 +2,13 @@ from dagster import file_relative_path, get_dagster_logger
 from dagster import AssetKey, EnvVar
 from dagster_dbt import DagsterDbtTranslator, DbtCliResource
 from dagster_duckdb import DuckDBResource
-from dagster_embedded_elt.sling import SlingResource, SlingSourceConnection, SlingTargetConnection
+from dagster_embedded_elt.sling import (
+    SlingResource,
+    SlingSourceConnection,
+    SlingTargetConnection,
+)
 
-duckdb_database=file_relative_path(__file__, "../data/db/osmds.db")
+duckdb_database = file_relative_path(__file__, "../data/db/osmds.db")
 
 duckdb_resource = DuckDBResource(
     database=duckdb_database,
@@ -16,10 +20,18 @@ PG_CONN_STR = "postgresql://demo:demo@sample-data.popsql.io:5432/marker"
 
 sling_resource = SlingResource(
     source_connection=SlingSourceConnection(
-        type="postgres", connection_string=PG_CONN_STR,
+        type="postgres",
+        host=EnvVar("PG_HOST"),
+        user=EnvVar("PG_USER"),
+        database=EnvVar("PG_DB"),
+        schema="public",
+        password=EnvVar("PG_PASSWORD"),
+        port=EnvVar("PG_PORT"),
     ),
     target_connection=SlingTargetConnection(
-        type="duckdb", instance=duckdb_database, duckdb_version="0.9.1",
+        type="duckdb",
+        instance=duckdb_database,
+        duckdb_version="0.9.1",
     ),
 )
 

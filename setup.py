@@ -4,7 +4,7 @@ setup(
     name="opensource_mds",
     packages=find_packages(exclude=["opensource_mds_tests"]),
     install_requires=[
-        "duckdb==0.9.1",
+        "duckdb",
         "dagster",
         "dagster-webserver",
         "dagster-dbt",
