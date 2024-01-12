@@ -1,25 +1,28 @@
+import subprocess
 import time
 import zipfile
 from tempfile import NamedTemporaryFile
-from dagster_duckdb import DuckDBResource
-from dagster_embedded_elt.sling import SlingMode, build_sling_asset
+from typing import List, Tuple
 
 import requests
-import subprocess
 from dagster import (
     AssetExecutionContext,
     AssetSpec,
     Backoff,
-    RetryPolicy,
-    file_relative_path,
-    asset,
     OpExecutionContext,
+    RetryPolicy,
+    asset,
+    file_relative_path,
 )
+from dagster_dbt import DbtCliResource, dbt_assets
+from dagster_duckdb import DuckDBResource
+from dagster_embedded_elt.sling import (
+    SlingMode,
+    build_sling_asset,
+)
+
 from . import constants
 from .resources import CustomDagsterDbtTranslator, dbt_manifest_path
-from dagster_dbt import dbt_assets, DbtCliResource
-
-from typing import List, Tuple
 
 retry_policy = RetryPolicy(
     max_retries=3,
@@ -296,7 +299,6 @@ events_raw = build_sling_asset(
     retry_policy=retry_policy,
 )
 def tickets(context: AssetExecutionContext, duckdb: DuckDBResource):
-    fpath = file_relative_path(__file__, "../data/raw/tickets.csv")
     with duckdb.get_connection() as conn:
         conn.execute("CREATE OR REPLACE TABLE tickets AS (SELECT * FROM tickets_raw)")
         nrows = conn.execute("SELECT COUNT(*) FROM tickets").fetchone()[0]  # type: ignore
