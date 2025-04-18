@@ -1,3 +1,22 @@
+[project]
+name = 'opensource-mds'
+version = '1.0.0'
+requires-python = ">=3.11"
+dependencies = [
+	"dagster",
+	"dagster-dg",
+	"dagster-dbt",
+	"dagster-duckdb",
+	"dagster-embedded-elt",
+	"dagster-webserver",
+	"duckdb",
+	"dbt-duckdb",
+	"numpy",
+	"polars",
+	"requests",
+	"pyarrow"
+	]
+
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"

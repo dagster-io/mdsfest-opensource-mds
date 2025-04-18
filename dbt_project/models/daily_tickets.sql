@@ -1,6 +1,6 @@
 select
 
-date_trunc('day', left(created_at, 10)::date) as created_at,
+created_at,
 channel,
 count(1) as num_tickets
 

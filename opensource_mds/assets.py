@@ -1,38 +1,31 @@
-import subprocess
 import time
 import zipfile
 from tempfile import NamedTemporaryFile
-from typing import List, Tuple
+from typing import Any, List, Mapping, Tuple
+import dagster as dg
 
+from dagster_sling import DagsterSlingTranslator
 import requests
-from dagster import (
-    AssetExecutionContext,
-    AssetSpec,
-    Backoff,
-    OpExecutionContext,
-    RetryPolicy,
-    asset,
-    file_relative_path,
-)
+
 from dagster_dbt import DbtCliResource, dbt_assets
 from dagster_duckdb import DuckDBResource
 from dagster_embedded_elt.sling import (
-    SlingMode,
-    build_sling_asset,
+    sling_assets,
+    SlingResource,
 )
 
 from . import constants
 from .resources import CustomDagsterDbtTranslator, dbt_manifest_path
 
-retry_policy = RetryPolicy(
+retry_policy = dg.RetryPolicy(
     max_retries=3,
     delay=0.2,  # 200ms
-    backoff=Backoff.EXPONENTIAL,
+    backoff=dg.Backoff.EXPONENTIAL,
 )
 
 
 def download_and_extract_data(
-    context: AssetExecutionContext, url: str
+    context: dg.AssetExecutionContext, url: str
 ) -> Tuple[List[str], float]:
     with NamedTemporaryFile(suffix=".zip") as f:
         start_time = time.time()
@@ -45,20 +38,20 @@ def download_and_extract_data(
         with zipfile.ZipFile(f.name, "r") as zip_ref:
             extracted_names = zip_ref.namelist()
             zip_ref.extractall(
-                file_relative_path(__file__, "../data/raw/checklist_data")
+                dg.file_relative_path(__file__, "../data/raw/checklist_data")
             )
             end_time = time.time()
             context.log.info(
                 "Extracted checklist data to {}".format(
-                    file_relative_path(__file__, "../raw/checklist_data")
+                    dg.file_relative_path(__file__, "../raw/checklist_data")
                 )
             )
 
         return extracted_names, end_time - start_time
 
 
-@asset(compute_kind="python", group_name="raw_data")
-def checklist_2020(context: AssetExecutionContext):
+@dg.asset(compute_kind="python", group_name="raw_data")
+def checklist_2020(context: dg.AssetExecutionContext):
     extracted_names, elapsed_times = download_and_extract_data(
         context, constants.CHECKLIST_2020
     )
@@ -71,8 +64,8 @@ def checklist_2020(context: AssetExecutionContext):
     )
 
 
-@asset(compute_kind="python", group_name="raw_data")
-def checklist_2023(context: AssetExecutionContext):
+@dg.asset(compute_kind="python", group_name="raw_data")
+def checklist_2023(context: dg.AssetExecutionContext):
     extracted_names, elapsed_times = download_and_extract_data(
         context, constants.CHECKLIST_2023
     )
@@ -85,8 +78,8 @@ def checklist_2023(context: AssetExecutionContext):
     )
 
 
-@asset(compute_kind="python", group_name="raw_data")
-def site_description_data(context: AssetExecutionContext):
+@dg.asset(compute_kind="python", group_name="raw_data")
+def site_description_data(context: dg.AssetExecutionContext):
     extracted_names, elapsed_times = download_and_extract_data(
         context, constants.SITE_DESCRIPTION_DATA
     )
@@ -99,8 +92,8 @@ def site_description_data(context: AssetExecutionContext):
     )
 
 
-@asset(compute_kind="python", group_name="raw_data")
-def species_translation_data(context: AssetExecutionContext):
+@dg.asset(compute_kind="python", group_name="raw_data")
+def species_translation_data(context: dg.AssetExecutionContext):
     extracted_names, elapsed_times = download_and_extract_data(
         context, constants.SPECIES_TRANSLATION_DATA
     )
@@ -113,23 +106,27 @@ def species_translation_data(context: AssetExecutionContext):
     )
 
 
-@asset(
+@dg.asset(
     deps=[checklist_2020, checklist_2023],
     compute_kind="duckdb",
     group_name="prepared",
     retry_policy=retry_policy,
 )
-def birds(context: AssetExecutionContext, duckdb: DuckDBResource):
-    cl2020 = file_relative_path(__file__, constants.CL_2020_FPATH)
-    cl2023 = file_relative_path(__file__, constants.CL_2023_FPATH)
+def birds(context: dg.AssetExecutionContext, duckdb: DuckDBResource):
+    cl2020 = dg.file_relative_path(__file__, constants.CL_2020_FPATH)
+    cl2023 = dg.file_relative_path(__file__, constants.CL_2023_FPATH)
     with duckdb.get_connection() as conn:
         conn.execute(
             f"""CREATE OR REPLACE TABLE birds_2020_tmp AS (
-                    SELECT * FROM read_csv_auto('{cl2020}', sample_size=-1))
+                    SELECT * FROM read_csv_auto('{cl2020}', 
+                        sample_size=-1))
             """
         )
         conn.execute(
-            f"CREATE OR REPLACE TABLE birds_2023_tmp AS (SELECT * FROM read_csv_auto('{cl2023}'))"
+            f"""CREATE OR REPLACE TABLE birds_2023_tmp AS (
+                    SELECT * FROM read_csv_auto('{cl2023}',
+                        sample_size=-1))
+            """
         )
         conn.execute(
             """ CREATE OR REPLACE TABLE birds as (
@@ -158,14 +155,14 @@ def birds(context: AssetExecutionContext, duckdb: DuckDBResource):
     )
 
 
-@asset(
+@dg.asset(
     deps=[species_translation_data],
     compute_kind="duckdb",
     group_name="prepared",
     retry_policy=retry_policy,
 )
-def species(context: AssetExecutionContext, duckdb: DuckDBResource):
-    species = file_relative_path(__file__, constants.SPECIES_TRANSLATION_FPATH)
+def species(context: dg.AssetExecutionContext, duckdb: DuckDBResource):
+    species = dg.file_relative_path(__file__, constants.SPECIES_TRANSLATION_FPATH)
     with duckdb.get_connection() as conn:
         conn.execute(
             f"""CREATE OR REPLACE TABLE species AS (
@@ -192,14 +189,14 @@ def species(context: AssetExecutionContext, duckdb: DuckDBResource):
     context.log.info("Created species table")
 
 
-@asset(
+@dg.asset(
     deps=[site_description_data],
     compute_kind="duckdb",
     group_name="prepared",
     retry_policy=retry_policy,
 )
-def sites(context: AssetExecutionContext, duckdb: DuckDBResource):
-    sites = file_relative_path(__file__, constants.SITE_DATA_FPATH)
+def sites(context: dg.AssetExecutionContext, duckdb: DuckDBResource):
+    sites = dg.file_relative_path(__file__, constants.SITE_DATA_FPATH)
     with duckdb.get_connection() as conn:
         conn.execute(
             f"""CREATE OR REPLACE TABLE sites AS (
@@ -226,81 +223,34 @@ def sites(context: AssetExecutionContext, duckdb: DuckDBResource):
     context.log.info("Created sites table")
 
 
-@asset(group_name="raw_data", compute_kind="steampipe")
-def bird_toots_csv(context: AssetExecutionContext):
-    result = subprocess.run(
-        ["steampipe", "query", constants.STEAMPIPE_QUERY, "--output", "csv"],
-        stdout=subprocess.PIPE,
-    )
-    output = result.stdout.decode().strip()
-    toot_path = file_relative_path(__file__, "../data/raw/bird_toots.csv")
-    with open(toot_path, "w") as file:
-        file.write(output)
+replication_config = {
+    "source": "postgres",
+    "target": "duckdb",
+    "defaults": {
+        "mode": "full-refresh",
+        "object": "{stream_schema}_{stream_table}"
+    },
+    "streams": {
+        "public.tickets": None,
+        "public.events": None
+    }
+}
 
-    context.log.info("Created bird_toots file")
+@sling_assets(replication_config=replication_config)
+def sling_sync_assets(context, sling: SlingResource):
+    yield from sling.replicate(context=context)
+    for row in sling.stream_raw_logs():
+        context.log.info(row)
 
-
-@asset(
-    deps=[bird_toots_csv],
+@dg.asset(
+    deps=[sling_sync_assets],
     compute_kind="duckdb",
     group_name="prepared",
     retry_policy=retry_policy,
 )
-def bird_toots(context: AssetExecutionContext, duckdb: DuckDBResource):
-    fpath = file_relative_path(__file__, "../data/raw/bird_toots.csv")
+def tickets(context: dg.AssetExecutionContext, duckdb: DuckDBResource):
     with duckdb.get_connection() as conn:
-        conn.execute(
-            f"""CREATE OR REPLACE TABLE bird_toots AS (
-                    SELECT * FROM read_csv_auto('{fpath}'))
-            """
-        )
-        nrows = conn.execute("SELECT COUNT(*) FROM bird_toots").fetchone()[0]  # type: ignore
-
-        metadata = conn.execute(
-            "select * from duckdb_tables() where table_name = 'bird_toots'"
-        ).pl()
-
-    context.add_output_metadata(
-        metadata={
-            "num_rows": nrows,
-            "table_name": metadata["table_name"][0],
-            "datbase_name": metadata["database_name"][0],
-            "schema_name": metadata["schema_name"][0],
-            "column_count": metadata["column_count"][0],
-            "estimated_size": metadata["estimated_size"][0],
-        }
-    )
-
-    context.log.info("Created bird_toots table")
-
-
-tickets_raw = build_sling_asset(
-    AssetSpec(
-        key=["tickets_raw"],
-        group_name="raw_data",
-    ),
-    source_stream="tickets",
-    target_object="tickets_raw",
-    mode=SlingMode.FULL_REFRESH,
-)
-
-events_raw = build_sling_asset(
-    AssetSpec(key=["events_raw"], group_name="raw_data"),
-    source_stream="events",
-    target_object="events_raw",
-    mode=SlingMode.FULL_REFRESH,
-)
-
-
-@asset(
-    deps=[tickets_raw],
-    compute_kind="duckdb",
-    group_name="prepared",
-    retry_policy=retry_policy,
-)
-def tickets(context: AssetExecutionContext, duckdb: DuckDBResource):
-    with duckdb.get_connection() as conn:
-        conn.execute("CREATE OR REPLACE TABLE tickets AS (SELECT * FROM tickets_raw)")
+        conn.execute("CREATE OR REPLACE TABLE tickets AS (SELECT * FROM main.public_tickets)")
         nrows = conn.execute("SELECT COUNT(*) FROM tickets").fetchone()[0]  # type: ignore
 
         metadata = conn.execute(
@@ -321,16 +271,15 @@ def tickets(context: AssetExecutionContext, duckdb: DuckDBResource):
     context.log.info("Created tickets table")
 
 
-@asset(
-    deps=[events_raw],
+@dg.asset(
+    deps=[sling_sync_assets],
     compute_kind="duckdb",
     group_name="prepared",
     retry_policy=retry_policy,
 )
-def events(context: AssetExecutionContext, duckdb: DuckDBResource):
-    fpath = file_relative_path(__file__, "../data/raw/events.csv")
+def events(context: dg.AssetExecutionContext, duckdb: DuckDBResource):
     with duckdb.get_connection() as conn:
-        conn.execute("CREATE OR REPLACE TABLE events AS (SELECT * FROM events_raw)")
+        conn.execute("CREATE OR REPLACE TABLE events AS (SELECT * FROM main.public_events)")
         nrows = conn.execute("SELECT COUNT(*) FROM events ").fetchone()[0]  # type: ignore
 
         metadata = conn.execute(
@@ -354,5 +303,5 @@ def events(context: AssetExecutionContext, duckdb: DuckDBResource):
 @dbt_assets(
     manifest=dbt_manifest_path, dagster_dbt_translator=CustomDagsterDbtTranslator()
 )
-def dbt_birds(context: OpExecutionContext, dbt: DbtCliResource):
+def dbt_birds(context: dg.AssetExecutionContext, dbt: DbtCliResource):
     yield from dbt.cli(["build"], context=context).stream()

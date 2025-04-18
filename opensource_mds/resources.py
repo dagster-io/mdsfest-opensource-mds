@@ -4,8 +4,7 @@ from dagster_dbt import DagsterDbtTranslator, DbtCliResource
 from dagster_duckdb import DuckDBResource
 from dagster_embedded_elt.sling import (
     SlingResource,
-    SlingSourceConnection,
-    SlingTargetConnection,
+    SlingConnectionResource,
 )
 
 duckdb_database = file_relative_path(__file__, "../data/db/osmds.db")
@@ -17,20 +16,21 @@ duckdb_resource = DuckDBResource(
 logger = get_dagster_logger()
 
 sling_resource = SlingResource(
-    source_connection=SlingSourceConnection(
-        type="postgres",
-        host=EnvVar("PG_HOST"),
-        user=EnvVar("PG_USER"),
-        database=EnvVar("PG_DB"),
-        schema="public",
-        password=EnvVar("PG_PASSWORD"),
-        port=EnvVar("PG_PORT"),
-    ),
-    target_connection=SlingTargetConnection(
-        type="duckdb",
-        instance=duckdb_database,
-        duckdb_version="0.9.1",
-    ),
+    connections=[
+        SlingConnectionResource(
+            name="postgres",
+            type="postgres",
+            host="sample-data.popsql.io",
+            user="demo",
+            database="marker",
+            password="demo",
+        ),
+        SlingConnectionResource(
+            name="duckdb",
+            type="duckdb",
+            instance=duckdb_database,
+        ),
+    ]
 )
 
 dbt_resource = DbtCliResource(
