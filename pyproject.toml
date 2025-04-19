@@ -23,3 +23,11 @@ build-backend = "setuptools.build_meta"
 
 [tool.dagster]
 module_name = "opensource_mds"
+
+# Add dg configuration
+[tool.dg]
+directory_type = "project"
+
+[tool.dg.project]
+root_module = "opensource_mds"
+code_location_target_module = "opensource_mds.definitions"
