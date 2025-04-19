@@ -1,17 +1,15 @@
 import time
 import zipfile
 from tempfile import NamedTemporaryFile
-from typing import Any, List, Mapping, Tuple
+from typing import List, Tuple
+
 import dagster as dg
-
-from dagster_sling import DagsterSlingTranslator
 import requests
-
 from dagster_dbt import DbtCliResource, dbt_assets
 from dagster_duckdb import DuckDBResource
 from dagster_embedded_elt.sling import (
-    sling_assets,
     SlingResource,
+    sling_assets,
 )
 
 from . import constants
