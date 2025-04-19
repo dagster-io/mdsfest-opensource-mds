@@ -3,4 +3,4 @@ dbirdt:
   outputs:
     dev:
       type: duckdb
-      path: ../data/db/osmds.db
+      path: ../dagster_project/data/db/osmds.db

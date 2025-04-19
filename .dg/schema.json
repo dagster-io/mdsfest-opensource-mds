@@ -1,0 +1,1391 @@
+{
+  "$defs": {
+    "AssetPostProcessorModelModel": {
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "default": "*",
+          "title": "Target",
+          "type": "string"
+        },
+        "operation": {
+          "default": "merge",
+          "enum": [
+            "merge",
+            "replace"
+          ],
+          "title": "Operation",
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/$defs/AssetsDefUpdateKwargsModel"
+        }
+      },
+      "required": [
+        "attributes"
+      ],
+      "title": "AssetPostProcessorModelModel",
+      "type": "object"
+    },
+    "AssetSpecKwargsModel": {
+      "additionalProperties": false,
+      "properties": {
+        "deps": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The asset keys for the upstream assets that this asset depends on.",
+          "examples": [
+            [
+              "my_database/my_schema/upstream_table"
+            ]
+          ],
+          "title": "Deps"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable description of the asset.",
+          "examples": [
+            "Refined sales data"
+          ],
+          "title": "Description"
+        },
+        "metadata": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "__DAGSTER_UNSET_DEFAULT__",
+          "description": "Additional metadata for the asset.",
+          "title": "Metadata"
+        },
+        "group_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Used to organize assets into groups, defaults to 'default'.",
+          "examples": [
+            "staging"
+          ],
+          "title": "Group Name"
+        },
+        "skippable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Whether this asset can be omitted during materialization, causing downstream dependencies to skip.",
+          "title": "Skippable"
+        },
+        "code_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A version representing the code that produced the asset. Increment this value when the code changes.",
+          "examples": [
+            "3"
+          ],
+          "title": "Code Version"
+        },
+        "owners": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A list of strings representing owners of the asset. Each string can be a user's email address, or a team name prefixed with `team:`, e.g. `team:finops`.",
+          "examples": [
+            [
+              "team:analytics",
+              "nelson@hooli.com"
+            ]
+          ],
+          "title": "Owners"
+        },
+        "tags": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "__DAGSTER_UNSET_DEFAULT__",
+          "description": "Tags for filtering and organizing.",
+          "examples": [
+            {
+              "team": "analytics",
+              "tier": "prod"
+            }
+          ],
+          "title": "Tags"
+        },
+        "kinds": {
+          "default": "__DAGSTER_UNSET_DEFAULT__",
+          "description": "A list of strings representing the kinds of the asset. These will be made visible in the Dagster UI.",
+          "examples": [
+            [
+              "snowflake"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Kinds",
+          "type": "array"
+        },
+        "automation_condition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The condition under which the asset will be automatically materialized.",
+          "title": "Automation Condition"
+        },
+        "key": {
+          "description": "A unique identifier for the asset.",
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "AssetSpecKwargsModel",
+      "type": "object"
+    },
+    "AssetSpecUpdateKwargsModel": {
+      "additionalProperties": false,
+      "properties": {
+        "deps": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The asset keys for the upstream assets that this asset depends on.",
+          "examples": [
+            [
+              "my_database/my_schema/upstream_table"
+            ]
+          ],
+          "title": "Deps"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable description of the asset.",
+          "examples": [
+            "Refined sales data"
+          ],
+          "title": "Description"
+        },
+        "metadata": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "__DAGSTER_UNSET_DEFAULT__",
+          "description": "Additional metadata for the asset.",
+          "title": "Metadata"
+        },
+        "group_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Used to organize assets into groups, defaults to 'default'.",
+          "examples": [
+            "staging"
+          ],
+          "title": "Group Name"
+        },
+        "skippable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Whether this asset can be omitted during materialization, causing downstream dependencies to skip.",
+          "title": "Skippable"
+        },
+        "code_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A version representing the code that produced the asset. Increment this value when the code changes.",
+          "examples": [
+            "3"
+          ],
+          "title": "Code Version"
+        },
+        "owners": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A list of strings representing owners of the asset. Each string can be a user's email address, or a team name prefixed with `team:`, e.g. `team:finops`.",
+          "examples": [
+            [
+              "team:analytics",
+              "nelson@hooli.com"
+            ]
+          ],
+          "title": "Owners"
+        },
+        "tags": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "__DAGSTER_UNSET_DEFAULT__",
+          "description": "Tags for filtering and organizing.",
+          "examples": [
+            {
+              "team": "analytics",
+              "tier": "prod"
+            }
+          ],
+          "title": "Tags"
+        },
+        "kinds": {
+          "default": "__DAGSTER_UNSET_DEFAULT__",
+          "description": "A list of strings representing the kinds of the asset. These will be made visible in the Dagster UI.",
+          "examples": [
+            [
+              "snowflake"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Kinds",
+          "type": "array"
+        },
+        "automation_condition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The condition under which the asset will be automatically materialized.",
+          "title": "Automation Condition"
+        },
+        "key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Key"
+        },
+        "key_prefix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Prefix the existing asset key with the provided value.",
+          "title": "Key Prefix"
+        }
+      },
+      "title": "AssetSpecUpdateKwargsModel",
+      "type": "object"
+    },
+    "AssetsDefUpdateKwargsModel": {
+      "additionalProperties": false,
+      "properties": {
+        "deps": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The asset keys for the upstream assets that this asset depends on.",
+          "examples": [
+            [
+              "my_database/my_schema/upstream_table"
+            ]
+          ],
+          "title": "Deps"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable description of the asset.",
+          "examples": [
+            "Refined sales data"
+          ],
+          "title": "Description"
+        },
+        "metadata": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "__DAGSTER_UNSET_DEFAULT__",
+          "description": "Additional metadata for the asset.",
+          "title": "Metadata"
+        },
+        "group_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Used to organize assets into groups, defaults to 'default'.",
+          "examples": [
+            "staging"
+          ],
+          "title": "Group Name"
+        },
+        "skippable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Whether this asset can be omitted during materialization, causing downstream dependencies to skip.",
+          "title": "Skippable"
+        },
+        "code_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A version representing the code that produced the asset. Increment this value when the code changes.",
+          "examples": [
+            "3"
+          ],
+          "title": "Code Version"
+        },
+        "owners": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A list of strings representing owners of the asset. Each string can be a user's email address, or a team name prefixed with `team:`, e.g. `team:finops`.",
+          "examples": [
+            [
+              "team:analytics",
+              "nelson@hooli.com"
+            ]
+          ],
+          "title": "Owners"
+        },
+        "tags": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": "__DAGSTER_UNSET_DEFAULT__",
+          "description": "Tags for filtering and organizing.",
+          "examples": [
+            {
+              "team": "analytics",
+              "tier": "prod"
+            }
+          ],
+          "title": "Tags"
+        },
+        "kinds": {
+          "default": "__DAGSTER_UNSET_DEFAULT__",
+          "description": "A list of strings representing the kinds of the asset. These will be made visible in the Dagster UI.",
+          "examples": [
+            [
+              "snowflake"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Kinds",
+          "type": "array"
+        },
+        "automation_condition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The condition under which the asset will be automatically materialized.",
+          "title": "Automation Condition"
+        }
+      },
+      "title": "AssetsDefUpdateKwargsModel",
+      "type": "object"
+    },
+    "BirdChecklist": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "opensource_mds.lib.BirdChecklist",
+          "default": "opensource_mds.lib.BirdChecklist",
+          "title": "Type",
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/$defs/BirdChecklistModel",
+          "default": null
+        },
+        "requirements": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRequirementsModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "BirdChecklist",
+      "type": "object"
+    },
+    "BirdChecklistModel": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "url"
+      ],
+      "title": "BirdChecklistModel",
+      "type": "object"
+    },
+    "ComponentRequirementsModel": {
+      "description": "Describes dependencies for a component to load.",
+      "properties": {
+        "env": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Env"
+        }
+      },
+      "title": "ComponentRequirementsModel",
+      "type": "object"
+    },
+    "DagsterDbtComponentsTranslatorSettingsModel": {
+      "additionalProperties": false,
+      "properties": {
+        "enable_asset_checks": {
+          "default": true,
+          "title": "Enable Asset Checks",
+          "type": "boolean"
+        },
+        "enable_duplicate_source_asset_keys": {
+          "default": false,
+          "title": "Enable Duplicate Source Asset Keys",
+          "type": "boolean"
+        },
+        "enable_code_references": {
+          "default": true,
+          "title": "Enable Code References",
+          "type": "boolean"
+        },
+        "enable_dbt_selection_by_name": {
+          "default": false,
+          "title": "Enable Dbt Selection By Name",
+          "type": "boolean"
+        },
+        "enable_source_tests_as_checks": {
+          "default": false,
+          "title": "Enable Source Tests As Checks",
+          "type": "boolean"
+        }
+      },
+      "title": "DagsterDbtComponentsTranslatorSettingsModel",
+      "type": "object"
+    },
+    "DbtProjectArgsModel": {
+      "additionalProperties": false,
+      "properties": {
+        "project_dir": {
+          "title": "Project Dir",
+          "type": "string"
+        },
+        "target_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Path"
+        },
+        "profiles_dir": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profiles Dir"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target"
+        },
+        "packaged_project_dir": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Packaged Project Dir"
+        },
+        "state_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "State Path"
+        }
+      },
+      "required": [
+        "project_dir"
+      ],
+      "title": "DbtProjectArgsModel",
+      "type": "object"
+    },
+    "DbtProjectComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "dagster_dbt.DbtProjectComponent",
+          "default": "dagster_dbt.DbtProjectComponent",
+          "title": "Type",
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/$defs/DbtProjectComponentModel",
+          "default": null
+        },
+        "requirements": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRequirementsModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "DbtProjectComponent",
+      "type": "object"
+    },
+    "DbtProjectComponentModel": {
+      "additionalProperties": false,
+      "properties": {
+        "project": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/DbtProjectArgsModel"
+            }
+          ],
+          "title": "Project"
+        },
+        "op": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OpSpecModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "translation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/AssetSpecUpdateKwargsModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Translation"
+        },
+        "select": {
+          "default": "fqn:*",
+          "title": "Select",
+          "type": "string"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exclude"
+        },
+        "translation_settings": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DagsterDbtComponentsTranslatorSettingsModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "project"
+      ],
+      "title": "DbtProjectComponentModel",
+      "type": "object"
+    },
+    "DefinitionsComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "dagster.components.DefinitionsComponent",
+          "default": "dagster.components.DefinitionsComponent",
+          "title": "Type",
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/$defs/DefinitionsComponentModel",
+          "default": null
+        },
+        "requirements": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRequirementsModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "DefinitionsComponent",
+      "type": "object"
+    },
+    "DefinitionsComponentModel": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Path"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "DefinitionsComponentModel",
+      "type": "object"
+    },
+    "DefsFolderComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "dagster.components.DefsFolderComponent",
+          "default": "dagster.components.DefsFolderComponent",
+          "title": "Type",
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/$defs/DefsFolderComponentYamlSchemaModel",
+          "default": null
+        },
+        "requirements": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRequirementsModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "DefsFolderComponent",
+      "type": "object"
+    },
+    "DefsFolderComponentYamlSchemaModel": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_post_processors": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/AssetPostProcessorModelModel"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Asset Post Processors"
+        }
+      },
+      "title": "DefsFolderComponentYamlSchemaModel",
+      "type": "object"
+    },
+    "DltLoadCollectionComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "dagster_dlt.DltLoadCollectionComponent",
+          "default": "dagster_dlt.DltLoadCollectionComponent",
+          "title": "Type",
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/$defs/DltLoadCollectionComponentModel",
+          "default": null
+        },
+        "requirements": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRequirementsModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "DltLoadCollectionComponent",
+      "type": "object"
+    },
+    "DltLoadCollectionComponentModel": {
+      "additionalProperties": false,
+      "properties": {
+        "loads": {
+          "items": {
+            "$ref": "#/$defs/DltLoadSpecModelModel"
+          },
+          "title": "Loads",
+          "type": "array"
+        }
+      },
+      "required": [
+        "loads"
+      ],
+      "title": "DltLoadCollectionComponentModel",
+      "type": "object"
+    },
+    "DltLoadSpecModelModel": {
+      "additionalProperties": false,
+      "properties": {
+        "pipeline": {
+          "title": "Pipeline",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "translation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/AssetSpecUpdateKwargsModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Translation"
+        }
+      },
+      "required": [
+        "pipeline",
+        "source"
+      ],
+      "title": "DltLoadSpecModelModel",
+      "type": "object"
+    },
+    "MultiRunBackfillPolicyModel": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "multi_run",
+          "default": "multi_run",
+          "title": "Type",
+          "type": "string"
+        },
+        "max_partitions_per_run": {
+          "default": 1,
+          "title": "Max Partitions Per Run",
+          "type": "integer"
+        }
+      },
+      "title": "MultiRunBackfillPolicyModel",
+      "type": "object"
+    },
+    "OpSpecModel": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "tags": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tags"
+        },
+        "backfill_policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SingleRunBackfillPolicyModel"
+            },
+            {
+              "$ref": "#/$defs/MultiRunBackfillPolicyModel"
+            }
+          ],
+          "default": null,
+          "title": "Backfill Policy"
+        }
+      },
+      "title": "OpSpecModel",
+      "type": "object"
+    },
+    "PipesSubprocessScriptCollectionComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "dagster.components.PipesSubprocessScriptCollectionComponent",
+          "default": "dagster.components.PipesSubprocessScriptCollectionComponent",
+          "title": "Type",
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/$defs/PipesSubprocessScriptCollectionComponentModel",
+          "default": null
+        },
+        "requirements": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRequirementsModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "PipesSubprocessScriptCollectionComponent",
+      "type": "object"
+    },
+    "PipesSubprocessScriptCollectionComponentModel": {
+      "additionalProperties": false,
+      "properties": {
+        "scripts": {
+          "items": {
+            "$ref": "#/$defs/PipesSubprocessScriptModel"
+          },
+          "title": "Scripts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "scripts"
+      ],
+      "title": "PipesSubprocessScriptCollectionComponentModel",
+      "type": "object"
+    },
+    "PipesSubprocessScriptModel": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "assets": {
+          "items": {
+            "$ref": "#/$defs/AssetSpecKwargsModel"
+          },
+          "title": "Assets",
+          "type": "array"
+        }
+      },
+      "required": [
+        "path",
+        "assets"
+      ],
+      "title": "PipesSubprocessScriptModel",
+      "type": "object"
+    },
+    "SingleRunBackfillPolicyModel": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "single_run",
+          "default": "single_run",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "title": "SingleRunBackfillPolicyModel",
+      "type": "object"
+    },
+    "SlingConnectionResource": {
+      "additionalProperties": true,
+      "description": "A representation of a connection to a database or file to be used by Sling. This resource can be used as a source or a target for a Sling syncs.\n\nReference the Sling docs for more information on possible connection types and parameters: https://docs.slingdata.io/connections\n\nThe name of the connection is passed to Sling and must match the name of the connection provided in the replication configuration: https://docs.slingdata.io/sling-cli/run/configuration/replication\nYou may provide either a connection string or keyword arguments for the connection.\n\nExamples:\n    Creating a Sling Connection for a file, such as CSV or JSON:\n\n    .. code-block:: python\n\n         source = SlingConnectionResource(name=\"MY_FILE\", type=\"file\")\n\n    Create a Sling Connection for a Postgres database, using a connection string:\n\n    .. code-block:: python\n\n        postgres_conn = SlingConnectionResource(name=\"MY_POSTGRES\", type=\"postgres\", connection_string=EnvVar(\"POSTGRES_CONNECTION_STRING\"))\n        mysql_conn = SlingConnectionResource(name=\"MY_MYSQL\", type=\"mysql\", connection_string=\"mysql://user:password@host:port/schema\")\n\n    Create a Sling Connection for a Postgres or Snowflake database, using keyword arguments:\n\n    .. code-block::python\n\n        postgres_conn = SlingConnectionResource(\n            name=\"MY_OTHER_POSRGRES\",\n            type=\"postgres\",\n            host=\"host\",\n            user=\"hunter42\",\n            password=EnvVar(\"POSTGRES_PASSWORD\")\n        )\n\n        snowflake_conn = SlingConnectionResource(\n            name=\"MY_SNOWFLAKE\",\n            type=\"snowflake\",\n            host=EnvVar(\"SNOWFLAKE_HOST\"),\n            user=EnvVar(\"SNOWFLAKE_USER\"),\n            database=EnvVar(\"SNOWFLAKE_DATABASE\"),\n            password=EnvVar(\"SNOWFLAKE_PASSWORD\"),\n            role=EnvVar(\"SNOWFLAKE_ROLE\")\n        )",
+      "properties": {
+        "name": {
+          "description": "The name of the connection, must match the name in your Sling replication configuration.",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "description": "Type of the source connection, must match the Sling connection types. Use 'file' for local storage.",
+          "title": "Type",
+          "type": "string"
+        },
+        "connection_string": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The optional connection string for the source database, if not using keyword arguments.",
+          "title": "Connection String"
+        }
+      },
+      "required": [
+        "name",
+        "type"
+      ],
+      "title": "SlingConnectionResource",
+      "type": "object"
+    },
+    "SlingReplicationCollectionComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "dagster_sling.SlingReplicationCollectionComponent",
+          "default": "dagster_sling.SlingReplicationCollectionComponent",
+          "title": "Type",
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/$defs/SlingReplicationCollectionComponentModel",
+          "default": null
+        },
+        "requirements": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ComponentRequirementsModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "SlingReplicationCollectionComponent",
+      "type": "object"
+    },
+    "SlingReplicationCollectionComponentModel": {
+      "additionalProperties": false,
+      "properties": {
+        "sling": {
+          "$ref": "#/$defs/SlingResource",
+          "default": "__DAGSTER_UNSET_DEFAULT__"
+        },
+        "replications": {
+          "default": "__DAGSTER_UNSET_DEFAULT__",
+          "items": {
+            "$ref": "#/$defs/SlingReplicationSpecModelModel"
+          },
+          "title": "Replications",
+          "type": "array"
+        },
+        "asset_post_processors": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/AssetPostProcessorModelModel"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Asset Post Processors"
+        }
+      },
+      "title": "SlingReplicationCollectionComponentModel",
+      "type": "object"
+    },
+    "SlingReplicationSpecModelModel": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "op": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OpSpecModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "translation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/AssetSpecUpdateKwargsModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Translation"
+        },
+        "include_metadata": {
+          "default": "__DAGSTER_UNSET_DEFAULT__",
+          "items": {
+            "enum": [
+              "column_metadata",
+              "row_count"
+            ],
+            "type": "string"
+          },
+          "title": "Include Metadata",
+          "type": "array"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "SlingReplicationSpecModelModel",
+      "type": "object"
+    },
+    "SlingResource": {
+      "description": "Resource for interacting with the Sling package. This resource can be used to run Sling replications.\n\nArgs:\n    connections (List[SlingConnectionResource]): A list of connections to use for the replication.\n\nExamples:\n    .. code-block:: python\n\n        from dagster_etl.sling import SlingResource, SlingConnectionResource\n\n        sling_resource = SlingResource(\n            connections=[\n                SlingConnectionResource(\n                    name=\"MY_POSTGRES\",\n                    type=\"postgres\",\n                    connection_string=EnvVar(\"POSTGRES_CONNECTION_STRING\"),\n                ),\n                SlingConnectionResource(\n                    name=\"MY_SNOWFLAKE\",\n                    type=\"snowflake\",\n                    host=EnvVar(\"SNOWFLAKE_HOST\"),\n                    user=EnvVar(\"SNOWFLAKE_USER\"),\n                    database=EnvVar(\"SNOWFLAKE_DATABASE\"),\n                    password=EnvVar(\"SNOWFLAKE_PASSWORD\"),\n                    role=EnvVar(\"SNOWFLAKE_ROLE\"),\n                ),\n            ]\n        )",
+      "properties": {
+        "connections": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SlingConnectionResource"
+          },
+          "title": "Connections",
+          "type": "array"
+        }
+      },
+      "title": "SlingResource",
+      "type": "object"
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#/$defs/DefinitionsComponent"
+    },
+    {
+      "$ref": "#/$defs/DefsFolderComponent"
+    },
+    {
+      "$ref": "#/$defs/PipesSubprocessScriptCollectionComponent"
+    },
+    {
+      "$ref": "#/$defs/DbtProjectComponent"
+    },
+    {
+      "$ref": "#/$defs/DltLoadCollectionComponent"
+    },
+    {
+      "$ref": "#/$defs/SlingReplicationCollectionComponent"
+    },
+    {
+      "$ref": "#/$defs/BirdChecklist"
+    }
+  ]
+}

@@ -3,8 +3,7 @@ name = 'opensource-mds'
 version = '1.0.0'
 requires-python = ">=3.11"
 dependencies = [
-	"dagster",
-	"dagster-dg",
+	"dagster>=1.10.16",
 	"dagster-dbt",
 	"dagster-duckdb",
 	"dagster-embedded-elt",
@@ -21,5 +20,19 @@ dependencies = [
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[project.entry-points]
+"dagster_dg_cli.plugin" = { opensource_mds = "opensource_mds.components"}
+
 [tool.dagster]
 module_name = "opensource_mds"
+
+# Add dg configuration
+[tool.dg]
+directory_type = "project"
+
+[tool.dg.project]
+root_module = "opensource_mds"
+code_location_target_module = "opensource_mds.definitions"
+
+[tool.dg.project.python_environment]
+uv_managed = true 

@@ -1,0 +1,40 @@
+---
+description: 
+globs: *.py
+alwaysApply: false
+---
+# Python Rules
+
+This rule applies to all Python files in the project.
+
+## File Pattern
+*.py
+
+## Description
+When working with Python files, we use `uv` as our package manager and runtime. Python files should be executed using the command `uv run {file}`.
+
+## Formatting
+- Use 4 spaces for indentation
+- Follow PEP 8 style guide
+- Use Ruff for code formatting and linting
+- Format on save
+- Use Ruff's recommended settings:
+  - Line length: 88
+  - Quote style: double quotes
+  - Import sorting: isort style
+
+## Commands
+- Run Python file: `uv run {file}`
+- Install dependencies: `uv pip install -r requirements.txt`
+- Format code: `ruff format {file}`
+- Lint code: `ruff check {file}`
+- Fix linting issues: `ruff check --fix {file}`
+
+## Best Practices
+- Use type hints where appropriate
+- Include docstrings for functions and classes
+- Use virtual environments for dependency management
+- Follow PEP 8 naming conventions
+- Use meaningful variable and function names
+- Keep functions focused and single-purpose
+- Use Ruff's auto-fix capabilities to maintain code quality 

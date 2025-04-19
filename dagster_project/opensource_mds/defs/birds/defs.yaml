@@ -1,0 +1,79 @@
+type: opensource_mds.components.DataDownloader
+
+attributes:
+  name: checklist_2020
+  url: "https://clo-pfw-prod.s3.us-west-2.amazonaws.com/data/202306/PFW_all_2016_2020_June2023_Public.zip" 
+  description: "Bird checklist data for 2016-2020"
+
+--- 
+type: opensource_mds.components.DataDownloader
+
+attributes:
+  name: checklist_2023
+  url: "https://clo-pfw-prod.s3.us-west-2.amazonaws.com/data/202306/PFW_all_2021_2023_June2023_Public.zip" 
+  description: "Bird checklist data for 2021-2023"
+
+---
+type: opensource_mds.components.DataDownloader
+
+attributes:
+  name: site_description_data
+  url: "https://clo-pfw-prod.s3.us-west-2.amazonaws.com/data/202306/PFW_count_site_data_public_June2023.zip"
+  description: "Site description and location data"
+
+---
+type: opensource_mds.components.DataDownloader
+
+attributes:
+  name: species_translation_data
+  url: "https://clo-pfw-prod.s3.us-west-2.amazonaws.com/data/202306/PFW_spp_translation_table_May2023.zip"
+  description: "Species translation table data"
+
+---
+type: opensource_mds.components.CSVToDuckDB
+
+attributes:
+  name: species
+  csv_file_path: "../../../data/raw/checklist_data/PFW_spp_translation_table_May2023.csv"
+  depends_on: "species_translation_data"
+  description: "Species translation table loaded into DuckDB"
+
+---
+type: opensource_mds.components.CSVToDuckDB
+
+attributes:
+  name: sites
+  csv_file_path: "../../../data/raw/checklist_data/PFW_count_site_data_public_June2023.csv"
+  depends_on: "site_description_data"
+  description: "Site description and location data loaded into DuckDB"
+
+---
+type: opensource_mds.components.DataCombiner
+
+attributes:
+  name: birds
+  csv_file_paths:
+    - "../../../data/raw/checklist_data/PFW_all_2016_2020_June2023_Public.csv"
+    - "../../../data/raw/checklist_data/PFW_all_2021_2023_June2023_Public.csv"
+  depends_on:
+    - "checklist_2020"
+    - "checklist_2023"
+  description: "Combined bird checklist data for 2016-2023"
+
+---
+type: opensource_mds.components.DuckDBTableCopier
+
+attributes:
+  name: tickets
+  source_table: "main.public_tickets"
+  depends_on: "sling_sync_assets"
+  description: "Tickets data copied from Sling sync"
+
+---
+type: opensource_mds.components.DuckDBTableCopier
+
+attributes:
+  name: events
+  source_table: "main.public_events"
+  depends_on: "sling_sync_assets"
+  description: "Events data copied from Sling sync"
