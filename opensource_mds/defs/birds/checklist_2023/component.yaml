@@ -1,0 +1,5 @@
+type: opensource_mds.lib.bird_checklist.BirdChecklist
+
+attributes:
+  name: checklist_2023
+  url: "https://clo-pfw-prod.s3.us-west-2.amazonaws.com/data/202306/PFW_all_2021_2023_June2023_Public.zip" 

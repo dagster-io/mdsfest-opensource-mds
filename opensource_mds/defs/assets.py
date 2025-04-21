@@ -50,34 +50,6 @@ def download_and_extract_data(
 
 
 @dg.asset(compute_kind="python", group_name="raw_data")
-def checklist_2020(context: dg.AssetExecutionContext):
-    extracted_names, elapsed_times = download_and_extract_data(
-        context, constants.CHECKLIST_2020
-    )
-    context.add_output_metadata(
-        metadata={
-            "names": extracted_names,
-            "num_files": len(extracted_names),
-            "elapsed_time": elapsed_times,
-        },
-    )
-
-
-@dg.asset(compute_kind="python", group_name="raw_data")
-def checklist_2023(context: dg.AssetExecutionContext):
-    extracted_names, elapsed_times = download_and_extract_data(
-        context, constants.CHECKLIST_2023
-    )
-    context.add_output_metadata(
-        metadata={
-            "names": extracted_names,
-            "num_files": len(extracted_names),
-            "elapsed_time": elapsed_times,
-        },
-    )
-
-
-@dg.asset(compute_kind="python", group_name="raw_data")
 def site_description_data(context: dg.AssetExecutionContext):
     extracted_names, elapsed_times = download_and_extract_data(
         context, constants.SITE_DESCRIPTION_DATA
@@ -106,7 +78,7 @@ def species_translation_data(context: dg.AssetExecutionContext):
 
 
 @dg.asset(
-    deps=[checklist_2020, checklist_2023],
+    deps=[dg.AssetKey("checklist_2020"), dg.AssetKey("checklist_2023")],
     compute_kind="duckdb",
     group_name="prepared",
     retry_policy=retry_policy,

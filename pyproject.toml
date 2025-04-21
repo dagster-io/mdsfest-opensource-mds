@@ -21,6 +21,9 @@ dependencies = [
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[project.entry-points]
+"dagster_dg.plugin" = { opensource_mds = "opensource_mds.lib"}
+
 [tool.dagster]
 module_name = "opensource_mds"
 
