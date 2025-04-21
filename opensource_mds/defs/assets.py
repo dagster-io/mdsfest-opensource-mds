@@ -4,16 +4,17 @@ from tempfile import NamedTemporaryFile
 from typing import List, Tuple
 
 import dagster as dg
-import requests
 from dagster_dbt import DbtCliResource, dbt_assets
+import requests
 from dagster_duckdb import DuckDBResource
 from dagster_embedded_elt.sling import (
     SlingResource,
     sling_assets,
 )
 
+from opensource_mds.defs.resources import CustomDagsterDbtTranslator, dbt_manifest_path
+
 from . import constants
-from .resources import CustomDagsterDbtTranslator, dbt_manifest_path
 
 retry_policy = dg.RetryPolicy(
     max_retries=3,
@@ -224,21 +225,17 @@ def sites(context: dg.AssetExecutionContext, duckdb: DuckDBResource):
 replication_config = {
     "source": "postgres",
     "target": "duckdb",
-    "defaults": {
-        "mode": "full-refresh",
-        "object": "{stream_schema}_{stream_table}"
-    },
-    "streams": {
-        "public.tickets": None,
-        "public.events": None
-    }
+    "defaults": {"mode": "full-refresh", "object": "{stream_schema}_{stream_table}"},
+    "streams": {"public.tickets": None, "public.events": None},
 }
+
 
 @sling_assets(replication_config=replication_config)
 def sling_sync_assets(context, sling: SlingResource):
     yield from sling.replicate(context=context)
     for row in sling.stream_raw_logs():
         context.log.info(row)
+
 
 @dg.asset(
     deps=[sling_sync_assets],
@@ -248,7 +245,9 @@ def sling_sync_assets(context, sling: SlingResource):
 )
 def tickets(context: dg.AssetExecutionContext, duckdb: DuckDBResource):
     with duckdb.get_connection() as conn:
-        conn.execute("CREATE OR REPLACE TABLE tickets AS (SELECT * FROM main.public_tickets)")
+        conn.execute(
+            "CREATE OR REPLACE TABLE tickets AS (SELECT * FROM main.public_tickets)"
+        )
         nrows = conn.execute("SELECT COUNT(*) FROM tickets").fetchone()[0]  # type: ignore
 
         metadata = conn.execute(
@@ -277,7 +276,9 @@ def tickets(context: dg.AssetExecutionContext, duckdb: DuckDBResource):
 )
 def events(context: dg.AssetExecutionContext, duckdb: DuckDBResource):
     with duckdb.get_connection() as conn:
-        conn.execute("CREATE OR REPLACE TABLE events AS (SELECT * FROM main.public_events)")
+        conn.execute(
+            "CREATE OR REPLACE TABLE events AS (SELECT * FROM main.public_events)"
+        )
         nrows = conn.execute("SELECT COUNT(*) FROM events ").fetchone()[0]  # type: ignore
 
         metadata = conn.execute(
