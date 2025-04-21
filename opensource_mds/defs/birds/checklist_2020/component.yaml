@@ -1,4 +1,4 @@
-type: opensource_mds.lib.bird_checklist.BirdChecklist
+type: opensource_mds.lib.BirdChecklist
 
 attributes:
   name: checklist_2020
