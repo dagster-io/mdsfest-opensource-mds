@@ -2,7 +2,7 @@ from dagster import file_relative_path, get_dagster_logger
 from dagster import AssetKey
 from dagster_dbt import DagsterDbtTranslator, DbtCliResource
 from dagster_duckdb import DuckDBResource
-from dagster_embedded_elt.sling import (
+from dagster_sling import (
     SlingResource,
     SlingConnectionResource,
 )

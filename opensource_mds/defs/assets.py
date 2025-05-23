@@ -7,7 +7,7 @@ import dagster as dg
 from dagster_dbt import DbtCliResource, dbt_assets
 import requests
 from dagster_duckdb import DuckDBResource
-from dagster_embedded_elt.sling import (
+from dagster_sling import (
     SlingResource,
     sling_assets,
 )
