@@ -1,11 +1,6 @@
-import time
-import zipfile
-from tempfile import NamedTemporaryFile
-from typing import List, Tuple
 
 import dagster as dg
 from dagster_dbt import DbtCliResource, dbt_assets
-import requests
 from dagster_duckdb import DuckDBResource
 from dagster_sling import (
     SlingResource,
@@ -21,60 +16,6 @@ retry_policy = dg.RetryPolicy(
     delay=0.2,  # 200ms
     backoff=dg.Backoff.EXPONENTIAL,
 )
-
-
-def download_and_extract_data(
-    context: dg.AssetExecutionContext, url: str
-) -> Tuple[List[str], float]:
-    with NamedTemporaryFile(suffix=".zip") as f:
-        start_time = time.time()
-        context.log.info("Downloading checklist data from {}".format(url))
-        r = requests.get(url)
-        context.log.info("Downloaded {} bytes".format(len(r.content)))
-        f.write(r.content)
-        f.seek(0)
-
-        with zipfile.ZipFile(f.name, "r") as zip_ref:
-            extracted_names = zip_ref.namelist()
-            zip_ref.extractall(
-                dg.file_relative_path(__file__, "../data/raw/checklist_data")
-            )
-            end_time = time.time()
-            context.log.info(
-                "Extracted checklist data to {}".format(
-                    dg.file_relative_path(__file__, "../raw/checklist_data")
-                )
-            )
-
-        return extracted_names, end_time - start_time
-
-
-@dg.asset(compute_kind="python", group_name="raw_data")
-def site_description_data(context: dg.AssetExecutionContext):
-    extracted_names, elapsed_times = download_and_extract_data(
-        context, constants.SITE_DESCRIPTION_DATA
-    )
-    context.add_output_metadata(
-        metadata={
-            "names": extracted_names,
-            "num_files": len(extracted_names),
-            "elapsed_time": elapsed_times,
-        },
-    )
-
-
-@dg.asset(compute_kind="python", group_name="raw_data")
-def species_translation_data(context: dg.AssetExecutionContext):
-    extracted_names, elapsed_times = download_and_extract_data(
-        context, constants.SPECIES_TRANSLATION_DATA
-    )
-    context.add_output_metadata(
-        metadata={
-            "names": extracted_names,
-            "num_files": len(extracted_names),
-            "elapsed_time": elapsed_times,
-        },
-    )
 
 
 @dg.asset(
@@ -127,7 +68,7 @@ def birds(context: dg.AssetExecutionContext, duckdb: DuckDBResource):
 
 
 @dg.asset(
-    deps=[species_translation_data],
+    deps=["species_translation_data"],
     compute_kind="duckdb",
     group_name="prepared",
     retry_policy=retry_policy,
@@ -161,7 +102,7 @@ def species(context: dg.AssetExecutionContext, duckdb: DuckDBResource):
 
 
 @dg.asset(
-    deps=[site_description_data],
+    deps=["site_description_data"],
     compute_kind="duckdb",
     group_name="prepared",
     retry_policy=retry_policy,

@@ -1,0 +1,30 @@
+type: opensource_mds.lib.DataDownloader
+
+attributes:
+  name: checklist_2020
+  url: "https://clo-pfw-prod.s3.us-west-2.amazonaws.com/data/202306/PFW_all_2016_2020_June2023_Public.zip" 
+  description: "Bird checklist data for 2016-2020"
+
+--- 
+type: opensource_mds.lib.DataDownloader
+
+attributes:
+  name: checklist_2023
+  url: "https://clo-pfw-prod.s3.us-west-2.amazonaws.com/data/202306/PFW_all_2021_2023_June2023_Public.zip" 
+  description: "Bird checklist data for 2021-2023"
+
+---
+type: opensource_mds.lib.DataDownloader
+
+attributes:
+  name: site_description_data
+  url: "https://clo-pfw-prod.s3.us-west-2.amazonaws.com/data/202306/PFW_count_site_data_public_June2023.zip"
+  description: "Site description and location data"
+
+---
+type: opensource_mds.lib.DataDownloader
+
+attributes:
+  name: species_translation_data
+  url: "https://clo-pfw-prod.s3.us-west-2.amazonaws.com/data/202306/PFW_spp_translation_table_May2023.zip"
+  description: "Species translation table data"

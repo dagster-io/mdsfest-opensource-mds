@@ -1,0 +1,16 @@
+# Astro Runtime includes the following pre-installed providers packages: https://www.astronomer.io/docs/astro/runtime-image-architecture#provider-packages
+
+# Core dependencies for the birds pipeline
+requests>=2.31.0
+duckdb>=0.9.0
+pyyaml>=6.0
+
+# Optional: If Sling is not pre-installed, you would need to install it
+# Note: Sling installation varies by system. For Docker/production:
+# RUN curl -LO "https://github.com/slingdata-io/sling-cli/releases/latest/download/sling_linux_amd64.tar.gz" && \
+#     tar -xzf sling_linux_amd64.tar.gz && \
+#     mv sling /usr/local/bin/ && \
+#     rm sling_linux_amd64.tar.gz
+
+# dbt will be called as subprocess - ensure it's available in the environment
+# dbt-core>=1.9.0  # Uncomment if dbt is not pre-installed
