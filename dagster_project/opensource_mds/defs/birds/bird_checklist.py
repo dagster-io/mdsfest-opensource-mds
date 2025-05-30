@@ -74,7 +74,3 @@ class DataDownloader(Component, Resolvable):
     ) -> Tuple[List[str], float]:
         """Executes the download and extraction process."""
         return _download_and_extract_data(context, self.url, component_directory)
-
-
-# Keep the old name for backward compatibility
-BirdChecklist = DataDownloader
