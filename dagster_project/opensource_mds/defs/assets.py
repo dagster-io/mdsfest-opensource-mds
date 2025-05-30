@@ -1,6 +1,5 @@
 import dagster as dg
 from dagster_dbt import DbtCliResource, dbt_assets
-from dagster_duckdb import DuckDBResource
 from dagster_sling import (
     SlingResource,
     sling_assets,

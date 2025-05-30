@@ -1,4 +1,4 @@
-type: opensource_mds.lib.DataDownloader
+type: opensource_mds.components.DataDownloader
 
 attributes:
   name: checklist_2020
@@ -6,7 +6,7 @@ attributes:
   description: "Bird checklist data for 2016-2020"
 
 --- 
-type: opensource_mds.lib.DataDownloader
+type: opensource_mds.components.DataDownloader
 
 attributes:
   name: checklist_2023
@@ -14,7 +14,7 @@ attributes:
   description: "Bird checklist data for 2021-2023"
 
 ---
-type: opensource_mds.lib.DataDownloader
+type: opensource_mds.components.DataDownloader
 
 attributes:
   name: site_description_data
@@ -22,7 +22,7 @@ attributes:
   description: "Site description and location data"
 
 ---
-type: opensource_mds.lib.DataDownloader
+type: opensource_mds.components.DataDownloader
 
 attributes:
   name: species_translation_data
@@ -30,7 +30,7 @@ attributes:
   description: "Species translation table data"
 
 ---
-type: opensource_mds.lib.CSVToDuckDB
+type: opensource_mds.components.CSVToDuckDB
 
 attributes:
   name: species
@@ -39,7 +39,7 @@ attributes:
   description: "Species translation table loaded into DuckDB"
 
 ---
-type: opensource_mds.lib.CSVToDuckDB
+type: opensource_mds.components.CSVToDuckDB
 
 attributes:
   name: sites
@@ -48,7 +48,7 @@ attributes:
   description: "Site description and location data loaded into DuckDB"
 
 ---
-type: opensource_mds.lib.DataCombiner
+type: opensource_mds.components.DataCombiner
 
 attributes:
   name: birds
@@ -61,7 +61,7 @@ attributes:
   description: "Combined bird checklist data for 2016-2023"
 
 ---
-type: opensource_mds.lib.DuckDBTableCopier
+type: opensource_mds.components.DuckDBTableCopier
 
 attributes:
   name: tickets
@@ -70,7 +70,7 @@ attributes:
   description: "Tickets data copied from Sling sync"
 
 ---
-type: opensource_mds.lib.DuckDBTableCopier
+type: opensource_mds.components.DuckDBTableCopier
 
 attributes:
   name: events
