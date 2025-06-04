@@ -3,7 +3,8 @@ name = 'opensource-mds'
 version = '1.0.0'
 requires-python = ">=3.11"
 dependencies = [
-	"dagster>=1.10.16",
+	"dagster>=1.10.18",
+    "dagster-dg-cli",
 	"dagster-dbt",
 	"dagster-duckdb",
 	"dagster-embedded-elt",
@@ -15,6 +16,12 @@ dependencies = [
 	"requests",
 	"pyarrow"
 	]
+
+[project.optional-dependencies]
+dev = [
+	"ruff",
+	"pytest"
+]
 
 [build-system]
 requires = ["setuptools"]
