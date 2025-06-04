@@ -1,1 +1,0 @@
-# Custom operators for the birds pipeline 

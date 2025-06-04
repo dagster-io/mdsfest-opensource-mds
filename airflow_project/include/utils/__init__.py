@@ -1,1 +1,0 @@
-# Utilities and constants for the birds pipeline 

@@ -1,4 +1,0 @@
-{
-  "data_dir": "/opt/airflow/data",
-  "dbt_project_dir": "/opt/airflow/dbt_project"
-} 
