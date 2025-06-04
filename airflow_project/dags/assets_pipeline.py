@@ -1,6 +1,6 @@
 """Basic Airflow asset scaffolding following the README plan."""
 
-from airflow.decorators import asset
+from airflow.sdk import asset
 
 # Default retry policy required by tests
 DEFAULT_ARGS = {"retries": 2}
