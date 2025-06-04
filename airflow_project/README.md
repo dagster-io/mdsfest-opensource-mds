@@ -6,13 +6,13 @@ This document sketches a plan for how to build an Airflow 3 project that mirrors
 
 The Dagster project defines a series of assets that ingest raw zip files, load CSV files into DuckDB, replicate data from Postgres via Sling, and run dbt models.  These assets are described in `dg list defs` output and the YAML component definitions under `opensouce_mds/defs/birds/defs.yaml`.
 
-Airflow 3 supports a similar concept via the `@asset` decorator and `Dataset` objects.  Assets can be grouped into asset DAGs and scheduled based on upstream dependencies.  Below is a high‑level plan to reproduce the Dagster assets in Airflow.
+Airflow 3 supports a similar concept via the `@asset` decorator and the newer assets API. Assets can be grouped into asset DAGs and scheduled based on upstream dependencies. Below is a high‑level plan to reproduce the Dagster assets in Airflow.
 
 ## 2. Required Resources
 
 - **DuckDB** – use the `DuckDBHook` (or run `duckdb` CLI commands via Python tasks) to create and query tables.
 - **Sling** – invoke the `sling` CLI just as in the Dockerfile.  Capture the replication logs so they can be pushed as XComs or logged.
-- **dbt** – execute `dbt build` using `BashOperator` or the `DbtBuildOperator` from the `astronomer-providers` package.
+- **dbt** – execute `dbt build` using the Cosmos provider rather than the legacy `DbtBuildOperator`.
 
 These resources should be installed in `requirements.txt` and imported in the DAG files.
 
@@ -44,13 +44,13 @@ The naming of the Airflow assets should match the Dagster asset keys exactly.  U
 1. **Create Airflow DAG package**
    - Add a Python module under `airflow_project/dags/assets_pipeline.py`.
    - Use the `asset` decorator from `airflow.decorators` to define each asset as a Python function.
-   - Define `dataset = Dataset("checklist_2020")` style objects for each asset so that dependencies can be declared.
+   - Declare upstream dependencies using Airflow's new assets API rather than the old `Dataset` objects. See the [Airflow datasets guide](https://www.astronomer.io/docs/learn/airflow-datasets) for details.
 
 2. **Download Assets**
    - For `checklist_2020`, `checklist_2023`, `site_description_data`, and `species_translation_data` create asset functions that download the zip file, extract to `data/raw/checklist_data`, and push metadata via XCom.
 
 3. **Load CSVs into DuckDB**
-   - Define asset functions `species` and `sites` that depend on the dataset from their respective downloads.  Use `DuckDBHook` or `duckdb` Python library to create `main.species` and `main.sites` tables.
+   - Define asset functions `species` and `sites` that depend on the datasets from their respective downloads. Use Airflow's `DuckDBHook` (see [Astronomer's example](https://github.com/astronomer/airflow-duckdb-examples)) to create `main.species` and `main.sites` tables.
    - Asset `birds` reads both CSV files and unions them into `main.birds` similar to the Dagster `DataCombiner` component.
 
 4. **Sling Replication**
@@ -58,8 +58,8 @@ The naming of the Airflow assets should match the Dagster asset keys exactly.  U
    - Downstream assets `events`, `tickets`, `target/public/events`, and `target/public/tickets` copy or move the Sling tables as needed.
 
 5. **dbt Models**
-   - Use the `DbtBuildOperator` within asset functions for `all_birds`, `daily_tickets`, and `top_birds_by_year`.
-   - Each dbt asset depends on its upstream raw tables (`birds`, `sites`, etc.) by referencing the dataset objects.
+   - Use the [Cosmos](https://www.astronomer.io/docs/learn/airflow-dbt/) provider to run `dbt build` for `all_birds`, `daily_tickets`, and `top_birds_by_year`.
+   - Each dbt asset depends on its upstream raw tables (`birds`, `sites`, etc.) using the assets API to define dependencies.
 
 6. **Scheduling & Groups**
    - Group assets in Airflow using the `@asset_group` decorator (or `AssetDAG`) to match the Dagster groups:
@@ -69,7 +69,7 @@ The naming of the Airflow assets should match the Dagster asset keys exactly.  U
    - Schedule the group to run daily or on demand, with dataset‑triggered runs for dbt assets.
 
 7. **Testing**
-   - Extend the example `test_dag_example.py` to ensure all asset DAGs load correctly and that each asset has tags and retries configured.
+   - Testing will be added in a future iteration once the Airflow assets are fully implemented.
 
 8. **Docker Image**
    - Update `Dockerfile` to install Airflow 3 runtime base image (`astro-runtime:3.0`) and include Sling, DuckDB, and dbt installations similar to the Dagster image.
